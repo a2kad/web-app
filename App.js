@@ -1,32 +1,40 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import HomeScreen from './screens/HomeScreen';
 import LoginScreen from './screens/LoginScreen';
+import HomeScreen from './screens/HomeScreen';
+import ProductScreen from './screens/ProductScreen';
+import { useEffect, useState } from 'react';
+import { User } from 'firebase/auth';
+import { onAuthStateChanged } from 'firebase/auth';
+import { FIREBASE_AUTH } from './FirebaseConfig';
 
 const Stack = createNativeStackNavigator();
+const InsideStack = createNativeStackNavigator();
 
-function App() {
+function InsideLayout (){
+  return(
+    <InsideStack.Navigator>
+      <InsideStack.Screen name='Home' component={HomeScreen} />
+      <InsideStack.Screen name='Products' component={ProductScreen} />
+    </InsideStack.Navigator>
+  );
+}
+
+export default function App() {
+  const [user, setUser] = useState (User | null);
+
+  useEffect(()=>{
+    onAuthStateChanged(FIREBASE_AUTH, (user)=>{
+      console.log('User', user);
+      setUser(user);
+    });
+  },[]);
   return (
     <NavigationContainer>
-      <Stack.Navigator>
-      
-        <Stack.Screen options={{ headerShown: false }} name="Login" component={LoginScreen} />
-        <Stack.Screen name="Home" component={HomeScreen} />
+      <Stack.Navigator  initialRouteName='Login'>
+      {user ? <Stack.Screen options={{ headerShown: true }} name="Inside" component={InsideLayout} /> : <Stack.Screen options={{ headerShown: false }} name="Login" component={LoginScreen} />}
         
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
-
-export default App;

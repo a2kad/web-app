@@ -1,107 +1,84 @@
-import { KeyboardAvoidingView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
-
-
+import { KeyboardAvoidingView, StyleSheet, Text, TextInput, Button, View, ActivityIndicator, } from 'react-native'
 import React, { useState } from 'react'
-import { auth } from '../firebase'
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { FIREBASE_AUTH } from '../FirebaseConfig'
+import {signInWithEmailAndPassword, createUserWithEmailAndPassword} from 'firebase/auth'
 
-const auth2 = getAuth();
+
 
 const LoginScreen = () => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
+    const auth = FIREBASE_AUTH;
 
-    
-    // const [email, setEmail] = useState('')
-    // const [password, setPassword] = useState('')
+    const signIn = async () => {
+        setLoading(true);
+        try{
+            const reponse = await signInWithEmailAndPassword(auth, email,password);
+            console.log(reponse);
+            
+        } catch (error) {
+            console.log(error);
+            alert('Sign In faled : '+error.message);
+        } finally {
+            setLoading(false);
+        }
+    }
 
-    // const handleSignUp = () => {
-    //     auth
-    //     .createUserWithEmailAndPassword(email,password)
-    //     .then(userCredentials =>{
-    //         const user = userCredentials.user;
-    //         console.log(user.email);
-    //     })
-    //     .catch(error => alert(error.message))
-    // }
+    const signUp = async () => {
+        setLoading(true);
+        try{
+            const reponse = await createUserWithEmailAndPassword(auth, email,password);
+            console.log(reponse);
+            alert('Check your emails!');
+        } catch (error) {
+            console.log(error);
+            alert('Sign Up faled : '+error.message);
+        } finally {
+            setLoading(false);
+        }
+    }
 
     return (
-        <KeyboardAvoidingView
-            style={styles.container}
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        >
-            <View style={styles.inputContainer}>
-                <TextInput
-                    placeholder='Email'
-                    value={email}
-                    onChangeText={text => setEmail(text)}
-                    style={styles.input}
-                ></TextInput>
-                <TextInput
-                    placeholder='Password'
-                    value={password}
-                    onChangeText={text => setPassword(text)}
-                    style={styles.input}
-                    secureTextEntry
-                ></TextInput>
-            </View>
-            <View style={styles.buttonContainer}>
-                <TouchableOpacity
-                onPress={() => {}}
-                style={styles.button}
-                >
-                <Text style={styles.buttonText}>Login</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                onPress={signUp}
-                style={[styles.button, styles.buttonOutline]}
-                >
-                <Text style={styles.buttonOutlineText}>Register</Text>
-                </TouchableOpacity>
-            </View>
+        <View style={styles.container}>
+        <View style={styles.top} >
+            <Text>
+            Bienvenue sur WebSolidarité App
+            </Text>
+        </View>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        <TextInput value={email} style={styles.input} placeholder='Email' autoCapitalize='none' onChangeText={(text) => setEmail(text)}></TextInput>
+        <TextInput secureTextEntry={true} value={password} style={styles.input} placeholder='Password' autoCapitalize='none' onChangeText={(text) => setPassword(text)}></TextInput>
+        {
+            loading ? <ActivityIndicator size="large" color="#0000ff" />
+            : <>
+            <Button title='Login' onPress={signIn} />
+            <Button title='Create Account' onPress={signUp} />
+            </>
+        }
         </KeyboardAvoidingView>
+    </View>
     )
 }
 
 export default LoginScreen
 
 const styles = StyleSheet.create({
-    container:{
+    top: {
+        marginHorizontal:20,
+
+    },
+    container: {
+        marginHorizontal: 20,
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center'
+        justifyContent:'center',
     },
-    inputContainer: {
-        width: '80%'
-    },
-    input:{
-        backgroundColor: 'white',
-        paddingHorizontal: 15,
-        paddingVertical: 10,
-        borderRadius: 10,
-        marginTop: 5
-    },
-    buttonContainer: {
-        width: '60%',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginTop: 40,
-    },
-    button:{
-        backgroundColor: '#0782F9',
-        width: '100%',
-        padding:15,
-        borderRadius: 10,
-        alignItems: 'center'
-    },
-    buttonOutline:{
-        marginTop: 5,
-    },
-    buttonText:{
-        color: 'white',
-        fontWeight: '700'
-    },
-    buttonOutlineText:{
-        color: 'white',
-        fontWeight: '700'
+    input: {
+        marginVertical: 4,
+        height:50,
+        borderWidth:1,
+        borderRadius: 4,
+        padding: 10,
+        backgroundColor: '#fff',
     }
 })
